@@ -11,6 +11,12 @@ parser.add_argument("--file",
 parser.add_argument("--run",
                     help="Get information by running ibnetdiscover",
                     action="store_true")
+parser.add_argument("--output",
+                    help="Name of the output file",
+                    action="store")
+parser.add_argument("--overwrite",
+                    help="Overwrite the output file if exists",
+                    action="store_true")
 
 
 args = parser.parse_args()
@@ -28,7 +34,13 @@ if args.run:
     try:
         result = subprocess.run(["ibnetdiscover"], capture_output=True, text=True)
         topology = Topology(result.stdout)
-        topology.topology()
+        output = None
+        overwrite = False
+        if args.output:
+            output = args.output
+        if args.overwrite:
+            overwrite = args.overwrite
+        topology.topology(outfile=output, overwrite=overwrite)
     except FileNotFoundError:
         print("Make sure that ibnetdiscover is installed")
         sys.exit(2)
