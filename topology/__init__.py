@@ -1,5 +1,9 @@
+import os.path
+import sys
+
 NODE = 0
 SWITCH = 1
+
 
 class Switch:
     def __init__(self, switch_id):
@@ -40,7 +44,7 @@ class Switch:
             temp = temp[:-1]
         nodes = self.nodes()
         if len(nodes) > 0:
-            temp +=" Nodes="
+            temp += " Nodes="
             for node in nodes:
                 temp += node.name + ","
         return temp[:-1]
@@ -68,9 +72,18 @@ class Topology:
         self.switches = {}
         self.parse(ibnetdiscover_content)
         
-    def topology(self):
-        for switch in self.switches.values():
-            print(switch.topology())
+    def topology(self, outfile=None, overwrite=False):
+        if outfile is not None:
+            if os.path.isfile(outfile) and overwrite is False:
+                sys.exit(3)
+
+            with open(outfile, "w") as out:
+                for switch in self.switches.values():
+                    for line in switch.topology():
+                        out.write(line)
+        else:
+            for switch in self.switches.values():
+                print(switch.topology())
 
     def parse(self, content):
         switch = None
